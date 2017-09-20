@@ -1,0 +1,23 @@
+[
+	{
+		"id": "tools",
+		"children":
+		[
+			{ "caption": "-", "id": "steep" },
+			{
+				"caption": "Steep",
+				"children":
+				[
+					{ "caption": "-", "id": "connection" },
+					{ "caption": "Connect to TTS", "command": "steep_connect" },
+					{ "caption": "Disconnect from TTS", "command": "steep_disconnect" },
+					{ "caption": "-", "id": "communication" },
+					{ "caption": "Load Scripts", "command": "steep_load" },
+					{ "caption": "Save and Play", "command": "steep_save" },
+					{ "caption": "-", "id": "script" },
+					{ "caption": "Reload Active Script", "command": "steep_load_script"}
+				]
+			}
+		]
+	}
+]
