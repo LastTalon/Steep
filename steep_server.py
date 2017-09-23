@@ -7,29 +7,38 @@ from time import sleep
 from queue import Queue, Empty
 from .script_manager import ScriptManager
 
+def _create_script(script, scripts, window):
+	view = window.new_file()
+	scripts.set(view.id(), script["guid"], script["name"], script["script"].replace("\r", ""))
+	view.set_scratch(True)
+	view.set_name(script["guid"] + " - " + script["name"])
+	view.set_syntax_file("Packages/Lua/Lua.tmLanguage")
+	view.run_command("steep_load_script")
 
-def _update_scripts(message, scripts, window):
+def _update_scripts(message, scripts, window, purge = False):
+	if purge:
+		scripts.clear()
 	for i in message["scriptStates"]:
 		id = scripts.get_tid(i["guid"])
 		if id != None:
-			scripts.set(id, i["guid"], i["name"], i["script"])
-			found = False
+			scripts.set(id, i["guid"], i["name"], i["script"].replace("\r", ""))
 			for j in window.views():
 				if j.id() == id:
 					j.set_name(i["guid"] + " - " + i["name"])
 					j.run_command("steep_load_script")
-					found = True
-			if not found:
-				view = window.new_file()
+					break
+			else:
 				del scripts[id]
-				scripts.set(view.id(), i["guid"], i["name"], i["script"])
-				view.set_name(i["guid"] + " - " + i["name"])
-				view.run_command("steep_load_script")
+				_create_script(i, scripts, window)
 		else:
-			view = window.new_file()
-			scripts.set(view.id(), i["guid"], i["name"], i["script"])
-			view.set_name(i["guid"] + " - " + i["name"])
-			view.run_command("steep_load_script")
+			_create_script(i, scripts, window)
+	if purge:
+		for i in window.views():
+			for j in scripts:
+				if i.id() == j:
+					break
+			else:
+				i.close()
 
 
 class Server(threading.Thread):
@@ -47,7 +56,7 @@ class Server(threading.Thread):
 		
 		while not self._exit.is_set():
 			try:
-				if serverSocket = None:
+				if serverSocket == None:
 					serverSocket = socket.socket()
 					serverSocket.settimeout(1)
 					serverSocket.bind(("127.0.0.1", 39998))
@@ -61,7 +70,7 @@ class Server(threading.Thread):
 			else:
 				self._read_data(connection)
 			finally:
-				if serverSocket != None (error or self._exit.is_set()):
+				if serverSocket != None and (error or self._exit.is_set()):
 					serverSocket.close()
 					serverSocket = None
 				if connection != None:
@@ -81,13 +90,7 @@ class Server(threading.Thread):
 				if message["messageID"] == 0:
 					_update_scripts(message, self._scripts, self._window)
 				elif message["messageID"] == 1:
-					_update_scripts(message, self._scripts, self._window)
-					for i in self._scripts:
-						for j in self._window.views():
-							if i == j.id():
-								break
-						else:
-							del self._scripts[i]
+					_update_scripts(message, self._scripts, self._window, True)
 				elif message["messageID"] == 2:
 					pass
 				elif message["messageID"] == 3:

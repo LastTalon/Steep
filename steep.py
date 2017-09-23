@@ -24,7 +24,7 @@ class SteepConnectCommand(sublime_plugin.WindowCommand):
 class SteepDisconnectCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global _connection, _scripts
-		if _connection != None and _connection[2] == self.window:
+		if _connection != None:
 			_connection[1].exit_thread()
 			_connection[0].exit_thread()
 			_connection[1].join()
@@ -34,7 +34,7 @@ class SteepDisconnectCommand(sublime_plugin.WindowCommand):
 	
 	def is_enabled(self):
 		global _connection
-		return _connection != None and _connection[2] == self.window
+		return _connection != None
 		
 class SteepLoadCommand(sublime_plugin.WindowCommand):
 	def run(self):
@@ -63,7 +63,10 @@ class SteepLoadScriptCommand(sublime_plugin.TextCommand):
 			if value == None:
 				if self.view.id() in _scripts:
 					self.view.replace(edit, sublime.Region(0, self.view.size()), _scripts[self.view.id()][2])
+					self.view.sel().clear()
 	
 	def is_enabled(self):
 		global _connection, _scripts
 		return _connection != None and self.view.id() in _scripts
+
+# TODO: Add event listener
