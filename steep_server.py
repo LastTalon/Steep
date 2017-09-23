@@ -7,13 +7,16 @@ from time import sleep
 from queue import Queue, Empty
 from .script_manager import ScriptManager
 
+def _update_script(script, scripts, view):
+	scripts.set(view.id(), script["guid"], script["name"], script["script"].replace("\r", ""))
+	view.set_name(script["guid"] + " - " + script["name"])
+	view.run_command("steep_load_script")
+
 def _create_script(script, scripts, window):
 	view = window.new_file()
-	scripts.set(view.id(), script["guid"], script["name"], script["script"].replace("\r", ""))
 	view.set_scratch(True)
-	view.set_name(script["guid"] + " - " + script["name"])
 	view.set_syntax_file("Packages/Lua/Lua.tmLanguage")
-	view.run_command("steep_load_script")
+	_update_script(script, scripts, view)
 
 def _update_scripts(message, scripts, window, purge = False):
 	if purge:
@@ -21,11 +24,9 @@ def _update_scripts(message, scripts, window, purge = False):
 	for i in message["scriptStates"]:
 		id = scripts.get_tid(i["guid"])
 		if id != None:
-			scripts.set(id, i["guid"], i["name"], i["script"].replace("\r", ""))
 			for j in window.views():
 				if j.id() == id:
-					j.set_name(i["guid"] + " - " + i["name"])
-					j.run_command("steep_load_script")
+					_update_script(i, scripts, j)
 					break
 			else:
 				del scripts[id]
