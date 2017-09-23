@@ -37,67 +37,61 @@ class Server(threading.Thread):
 		super().__init__()
 		self._scripts = scripts
 		self._window = window
-		self._lock = threading.RLock()
 		self._exit = threading.Event()
-		self._socket = socket.socket()
-		self._connection = None
-		self._reconnecting = False
-		self._continuing = False
 	
 	def run(self):
+		serverSocket = None
+		connection = None
+		address = None
+		error = False
+		
 		while not self._exit.is_set():
-			self._socket.settimeout(1)
-			with self._lock:
-				self._reconnecting = False
 			try:
-				if not self._continuing:
-					self._socket.bind(("127.0.0.1", 39998))
-					self._socket.listen(1)
-					self._continuing = True
-				self._connection, address = self._socket.accept()
+				if serverSocket = None:
+					serverSocket = socket.socket()
+					serverSocket.settimeout(1)
+					serverSocket.bind(("127.0.0.1", 39998))
+					serverSocket.listen(1)
+				connection, address = serverSocket.accept()
 			except socket.timeout:
 				pass
 			except OSError:
-				self._continuing = False
+				error = True
+				sleep(0.5)
 			else:
-				while not self._exit.is_set() and not self._reconnecting:
-					self._read_data()
+				self._read_data(connection)
 			finally:
-				if not self._continuing or self._exit.is_set():
-					self._socket.close()
-					self._socket = socket.socket()
-				if self._connection != None:
-					self._connection.close()
-					self._connection = None
+				if serverSocket != None (error or self._exit.is_set()):
+					serverSocket.close()
+					serverSocket = None
+				if connection != None:
+					connection.close()
+					connection = None
 	
-	def _read_data(self):
-		with self._connection.makefile("r") as f:
+	def _read_data(self, connection):
+		with connection.makefile("r") as f:
 			try:
-				# message = json.load(f)
+				message = json.load(f)
 				# print("Loaded")
-				print("Server:", self._connection.recv(4096))
-				sleep(.5)
+				# print("Server:", connection.recv(4096))
+				# sleep(.5)
 			except socket.timeout:
 				pass
-			# else:
-				# if message["messageID"] == 0:
-				# 	_update_scripts(message, self._scripts, self._window)
-				# elif message["messageID"] == 1:
-				# 	_update_scripts(message, self._scripts, self._window)
-				# 	for i in self._scripts:
-				# 		for j in self._window.views():
-				# 			if i == j.id():
-				# 				break
-				# 		else:
-				# 			del self._scripts[i]
-				# elif message["messageID"] == 2:
-				# 	pass
-				# elif message["messageID"] == 3:
-				# 	pass
-	
-	def reconnect(self):
-		with self._lock:
-			self._reconnecting = True
+			else:
+				if message["messageID"] == 0:
+					_update_scripts(message, self._scripts, self._window)
+				elif message["messageID"] == 1:
+					_update_scripts(message, self._scripts, self._window)
+					for i in self._scripts:
+						for j in self._window.views():
+							if i == j.id():
+								break
+						else:
+							del self._scripts[i]
+				elif message["messageID"] == 2:
+					pass
+				elif message["messageID"] == 3:
+					pass
 	
 	def exit_thread(self):
 		self._exit.set()
@@ -138,7 +132,6 @@ class Client(threading.Thread):
 							elif command == 1:
 								self._send_save()
 					self._read_data()
-				self._server.reconnect()
 			finally:
 				self._socket.close()
 				self._socket = socket.socket()
@@ -177,6 +170,7 @@ class Client(threading.Thread):
 	def _read_data(self):
 		with self._socket.makefile("r") as f:
 			try:
+				# TODO: Sends one message at a time then closes stream...
 				# message = json.load(f)
 				# print("Loaded")
 				print("Client:", self._socket.recv(4096))
