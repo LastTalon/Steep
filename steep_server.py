@@ -74,6 +74,7 @@ class Server(threading.Thread):
 				if serverSocket != None and (error or self._exit.is_set()):
 					serverSocket.close()
 					serverSocket = None
+					error = False
 				if connection != None:
 					connection.close()
 					connection = None
