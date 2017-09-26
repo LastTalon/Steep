@@ -25,7 +25,7 @@ If you wish to contribute please read [CONTRIBUTING.md](CONTRIBUTING.md) for con
 ## Authors
 - Lucas Gangstad - [LastTalon](https://github.com/LastTalon)
 
-See also the [contributors](contributors).
+See also the [contributors](https://github.com/LastTalon/Steep/contributors).
 
 ## License
 Steep is licensed under the zlib License. See [LICENSE.md](LICENSE.md) for details.

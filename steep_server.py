@@ -83,9 +83,6 @@ class Server(threading.Thread):
 		with connection.makefile("r") as f:
 			try:
 				message = json.load(f)
-				# print("Loaded")
-				# print("Server:", connection.recv(4096))
-				# sleep(.5)
 			except socket.timeout:
 				pass
 			else:
@@ -107,51 +104,52 @@ class Client(threading.Thread):
 		super().__init__()
 		self._scripts = scripts
 		self._window = window
-		self._server = server
 		self._exit = threading.Event()
 		self._queue = Queue()
-		self._socket = socket.socket()
-		self._timeouts = 0
-		self._continuing = False
 	
 	def run(self):
 		while not self._exit.is_set():
-			self._socket.settimeout(1)
-			self._timeouts = 0
-			try:
-				self._socket.connect(("127.0.0.1", 39999))
-			except socket.timeout:
-				pass
-			except OSError:
-				sleep(1)
-			else:
-				while not self._exit.is_set() and self._timeouts < 10:
-					while not self._queue.empty():
-						try:
-							command = self._queue.get(False)
-						except Empty:
-							pass
-						else:
-							if command == 0:
-								self._send_get()
-							elif command == 1:
-								self._send_save()
-					self._read_data()
-			finally:
-				self._socket.close()
-				self._socket = socket.socket()
+			while not self._queue.empty():
+				try:
+					command = self._queue.get(False)
+				except Empty:
+					pass
+				else:
+					if command == 0:
+						self._send_get()
+					elif command == 1:
+						self._send_save()
+			sleep(0.5)
+	
+	def _open_socket(self):
+		connection = socket.socket()
+		connection.settimeout(1)
+		try:
+			connection.connect(("127.0.0.1", 39999))
+		except socket.timeout:
+			pass
+		except OSError:
+			pass
+		else:
+			return connection
+		connection.close()
+		return None
 	
 	def _send_get(self):
 		message = dict()
 		message["messageID"] = 0
 		
-		with self._socket.makefile("w") as f:
-			try:
-				json.dump(message, f)
-				self._timouts = 0
-			except socket.timeout:
-				self._timouts += 1
-				self._queue.put(0, False)
+		try:
+			clientSocket = self._open_socket()
+			if clientSocket != None:
+				self._send_data(clientSocket, message)
+				message = self._read_data(clientSocket)
+				
+				if message != None and message["messageID"] == 0:
+					_update_scripts(message, self._scripts, self._window, True)
+		finally:
+			if clientSocket != None:
+				clientSocket.close()
 	
 	def _send_save(self):
 		message = dict()
@@ -164,34 +162,30 @@ class Client(threading.Thread):
 				script["script"] = i.substr(sublime.Region(0, i.size()))
 				message["scriptStates"].append(script)
 		
-		with self._socket.makefile("w") as f:
-			try:
-				json.dump(message, f)
-				self._timouts = 0
-			except socket.timeout:
-				self._queue.put(1, False)
-				self._timouts += 1
+		try:
+			clientSocket = self._open_socket()
+			if clientSocket != None:
+				self._send_data(clientSocket, message)
+		finally:
+			if clientSocket != None:
+				clientSocket.close()
 	
-	def _read_data(self):
-		with self._socket.makefile("r") as f:
+	def _send_data(self, connection, message):
+		with connection.makefile("w") as stream:
 			try:
-				# TODO: Sends one message at a time then closes stream...
-				# message = json.load(f)
-				# print("Loaded")
-				print("Client:", self._socket.recv(4096))
-				sleep(.5)
-			except socket.timeout:
+				json.dump(message, stream)
+			except connection.timeout:
 				pass
-			# else:
-			# 	self._timouts = 0
-			# 	if message["messageID"] == 0:
-			# 		_update_scripts(message, self._scripts, self._window)
-			# 		for i in self._scripts:
-			# 			for j in self._window.views():
-			# 				if i == j.id():
-			# 					break
-			# 			else:
-			# 				del self._scripts[i]
+	
+	def _read_data(self, connection):
+		with connection.makefile("r") as stream:
+			try:
+				message = json.load(stream)
+			except connection.timeout:
+				pass
+			else:
+				return message
+		return None
 	
 	def get(self):
 		self._queue.put(0, False)
