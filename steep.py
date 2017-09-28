@@ -7,13 +7,15 @@ from .steep_server import Server, Client
 _connection = None
 _scripts = ScriptManager()
 
-class SteepConnectCommand(sublime_plugin.WindowCommand):
+class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _scripts
 		_scripts.clear()
-		server = Server(_scripts, self.window)
-		client = Client(_scripts, self.window, server)
-		_connection = (server, client, self.window)
+		sublime.run_command("new_window")
+		window = sublime.active_window()
+		server = Server(_scripts, window)
+		client = Client(_scripts, window)
+		_connection = (server, client, window)
 		_connection[0].start()
 		_connection[1].start()
 	
@@ -21,7 +23,7 @@ class SteepConnectCommand(sublime_plugin.WindowCommand):
 		global _connection
 		return _connection == None
 		
-class SteepDisconnectCommand(sublime_plugin.WindowCommand):
+class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _scripts
 		if _connection != None:

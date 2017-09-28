@@ -105,7 +105,7 @@ class Server(threading.Thread):
 
 
 class Client(threading.Thread):
-	def __init__(self, scripts, window, server):
+	def __init__(self, scripts, window):
 		super().__init__()
 		self._scripts = scripts
 		self._window = window
