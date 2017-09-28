@@ -69,4 +69,4 @@ class SteepLoadScriptCommand(sublime_plugin.TextCommand):
 		global _connection, _scripts
 		return _connection != None and self.view.id() in _scripts
 
-# TODO: Add event listener
+# TODO: Add window close event listener

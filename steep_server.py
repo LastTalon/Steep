@@ -20,7 +20,12 @@ def _create_script(script, scripts, window):
 
 def _update_scripts(message, scripts, window, purge = False):
 	if purge:
-		scripts.clear()
+		for i in scripts:
+			for j in message["scriptStates"]:
+				if scripts[i][0] == j["guid"]:
+					break
+			else:
+				del scripts[i]
 	for i in message["scriptStates"]:
 		id = scripts.get_tid(i["guid"])
 		if id != None:
@@ -158,7 +163,7 @@ class Client(threading.Thread):
 		for i in self._window.views():
 			if i.id() in self._scripts:
 				script = dict()
-				script["guid"] = self._scripts[i][0]
+				script["guid"] = self._scripts[i.id()][0]
 				script["script"] = i.substr(sublime.Region(0, i.size()))
 				message["scriptStates"].append(script)
 		
