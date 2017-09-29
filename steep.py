@@ -7,17 +7,29 @@ from .steep_server import Server, Client
 _connection = None
 _scripts = ScriptManager()
 
+def _check_window():
+	global _connection
+	if _connection != None:
+		for i in sublime.windows():
+			if i == _connection[2]:
+				sublime.set_timeout_async(_check_window, 0.5)
+				break
+		else:
+			sublime.run_command("steep_disconnect")
+
 class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _scripts
-		_scripts.clear()
-		sublime.run_command("new_window")
-		window = sublime.active_window()
-		server = Server(_scripts, window)
-		client = Client(_scripts, window)
-		_connection = (server, client, window)
-		_connection[0].start()
-		_connection[1].start()
+		if _connection == None:
+			_scripts.clear()
+			sublime.run_command("new_window")
+			window = sublime.active_window()
+			server = Server(_scripts, window)
+			client = Client(_scripts, window)
+			_connection = (server, client, window)
+			_connection[0].start()
+			_connection[1].start()
+			sublime.set_timeout_async(_check_window, 0.5)
 	
 	def is_enabled(self):
 		global _connection
@@ -70,5 +82,3 @@ class SteepLoadScriptCommand(sublime_plugin.TextCommand):
 	def is_enabled(self):
 		global _connection, _scripts
 		return _connection != None and self.view.id() in _scripts
-
-# TODO: Add window close event listener
