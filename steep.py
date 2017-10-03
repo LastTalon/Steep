@@ -40,6 +40,7 @@ class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 class SteepFinalizeDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _disconnect
+		_connection[2].run_command("close_window")
 		_connection = None
 		_disconnect = None
 	
