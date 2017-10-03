@@ -1,26 +1,18 @@
 import sublime
 import sublime_plugin
 from .script_manager import ScriptManager
-from .steep_server import Server, Client
+from .steep_server import Server, Client, Disconnect
 
 
 _connection = None
 _scripts = ScriptManager()
+_disconnect = None
 
-def _check_window():
-	global _connection
-	if _connection != None:
-		for i in sublime.windows():
-			if i == _connection[2]:
-				sublime.set_timeout_async(_check_window, 0.5)
-				break
-		else:
-			sublime.run_command("steep_disconnect")
 
 class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
-		global _connection, _scripts
-		if _connection == None:
+		global _connection, _scripts, _disconnect
+		if _connection == None and _disconnect == None:
 			_scripts.clear()
 			sublime.run_command("new_window")
 			window = sublime.active_window()
@@ -29,26 +21,30 @@ class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 			_connection = (server, client, window)
 			_connection[0].start()
 			_connection[1].start()
-			sublime.set_timeout_async(_check_window, 0.5)
 	
 	def is_enabled(self):
-		global _connection
+		global _connection, _disconnect
 		return _connection == None
 		
 class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
-		global _connection, _scripts
-		if _connection != None:
-			_connection[1].exit_thread()
-			_connection[0].exit_thread()
-			_connection[1].join()
-			_connection[0].join()
-			_scripts.clear()
-			_connection = None
+		global _connection, _disconnect
+		if _connection != None and _disconnect == None:
+			_disconnect = Disconnect(_connection[0], _connection[1], _scripts)
+			_disconnect.start()
 	
 	def is_enabled(self):
-		global _connection
-		return _connection != None
+		global _connection, _disconnect
+		return _connection != None and _disconnect == None
+
+class SteepFinalizeDisconnectCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global _connection, _disconnect
+		_connection = None
+		_disconnect = None
+	
+	def is_visible(self):
+		return False
 		
 class SteepLoadCommand(sublime_plugin.WindowCommand):
 	def run(self):

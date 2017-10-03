@@ -83,6 +83,11 @@ class Server(threading.Thread):
 				if connection != None:
 					connection.close()
 					connection = None
+				for i in sublime.windows():
+					if i == self._window:
+						break
+				else:
+					sublime.run_command("steep_disconnect")
 	
 	def _read_data(self, connection):
 		with connection.makefile("r") as f:
@@ -200,3 +205,20 @@ class Client(threading.Thread):
 	
 	def exit_thread(self):
 		self._exit.set()
+
+
+class Disconnect(threading.Thread):
+	def __init__(self, server, client, scripts):
+		super().__init__()
+		self._server = server
+		self._client = client
+		self._scripts = scripts
+		self._disconnected = False
+	
+	def run(self):
+		self._client.exit_thread()
+		self._server.exit_thread()
+		self._client.join()
+		self._server.join()
+		self._scripts.clear()
+		sublime.run_command("steep_finalize_disconnect")
