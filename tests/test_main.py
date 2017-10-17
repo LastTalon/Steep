@@ -1,5 +1,5 @@
 import unittest
-from steep import steep
+from Steep import steep
 
 class TestSteep(unittest.TestCase):
 	pass
