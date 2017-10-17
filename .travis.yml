@@ -1,0 +1,39 @@
+env:
+    global:
+        - PACKAGE="Steep"
+        - SUBLIME_TEXT_VERSION="3"
+
+matrix:
+    include:
+        - os: linux
+          language: python
+          python: 3.3
+        - os: osx
+          language: generic
+
+before_install:
+    - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
+    - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
+            export DISPLAY=:99.0;
+            sh -e /etc/init.d/xvfb start;
+      fi
+
+install:
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+            brew update;
+            brew install python3;
+            pip3 install codecov;
+      fi
+    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+            pip install codecov;
+      fi
+    - sh travis.sh bootstrap
+
+script:
+    - sh travis.sh run_tests --coverage
+
+after_success:
+    - codecov
+
+notifications:
+    email: false
