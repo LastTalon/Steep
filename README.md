@@ -1,4 +1,9 @@
 # Steep
+
+[![Build Status](https://travis-ci.org/LastTalon/Steep.svg?branch=master)](https://travis-ci.org/LastTalon/Steep)
+[![codecov](https://codecov.io/gh/LastTalon/Steep/branch/master/graph/badge.svg)](https://codecov.io/gh/LastTalon/Steep)
+<a href="https://www.paypal.me/LastTalon/5usd" title="Donate using Paypal"><img src="https://img.shields.io/badge/paypal-donate-blue.svg" /></a>
+
 Steep is the **Sublime TTS External Editor Plugin**. Its a [Sublime Text](https://www.sublimetext.com/) plugin for editing scripts in [Tabletop Simulator](http://berserk-games.com/tabletop-simulator/). The plugin allows easy modification, testing, and execution of Tabletop Simulator's Lua scripts. This is the Sublime Text counterpart to the provided [Atom Editor Plugin](http://berserk-games.com/knowledgebase/atom-editor-plugin/).
 
 ## Installation
