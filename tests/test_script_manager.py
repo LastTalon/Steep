@@ -118,3 +118,9 @@ class TestScriptManager(unittest.TestCase):
 		self.scriptManager.set(300, "bar", "script", "script")
 		self.assertFalse(self.scriptManager.contains_tid("c"))
 		self.assertTrue(self.scriptManager.contains_tid("bar"))
+	
+	def test_iterator(self):
+		iterator = iter(self.scriptManager)
+		self.assertIs(iterator, iter(iterator))
+		for i in iterator:
+			self.assertIn(i, self.scriptManager)
