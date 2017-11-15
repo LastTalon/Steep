@@ -5,6 +5,7 @@ import socket
 import json
 from time import sleep
 from queue import Queue, Empty
+from .script_manager import ScriptManager
 
 def _update_script(script, scripts, view):
 	scripts.set(view.id(), script["guid"], script["name"], script["script"].replace("\r", ""))

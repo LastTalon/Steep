@@ -1,5 +1,7 @@
 import sublime
 import sublime_plugin
+from .script_manager import ScriptManager
+from .steep_server import Server, Client, Disconnect
 
 _connection = None
 _scripts = ScriptManager()
