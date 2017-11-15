@@ -12,7 +12,7 @@ _disconnect = None
 class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _scripts, _disconnect
-		if _connection == None and _disconnect == None:
+		if self.is_enabled():
 			_scripts.clear()
 			sublime.run_command("new_window")
 			window = sublime.active_window()
@@ -24,12 +24,12 @@ class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	
 	def is_enabled(self):
 		global _connection, _disconnect
-		return _connection == None
+		return _connection == None and _disconnect == None
 		
 class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global _connection, _disconnect
-		if _connection != None and _disconnect == None:
+		if self.is_enabled():
 			_disconnect = Disconnect(_connection[0], _connection[1], _scripts)
 			_disconnect.start()
 	
@@ -50,7 +50,7 @@ class SteepFinalizeDisconnectCommand(sublime_plugin.ApplicationCommand):
 class SteepLoadCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global _connection
-		if _connection != None and _connection[2] == self.window:
+		if self.is_enabled():
 			_connection[1].get()
 	
 	def is_enabled(self):
@@ -60,7 +60,7 @@ class SteepLoadCommand(sublime_plugin.WindowCommand):
 class SteepSaveCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global _connection
-		if _connection != None and _connection[2] == self.window:
+		if self.is_enabled():
 			_connection[1].save()
 	
 	def is_enabled(self):
@@ -69,12 +69,11 @@ class SteepSaveCommand(sublime_plugin.WindowCommand):
 
 class SteepLoadScriptCommand(sublime_plugin.TextCommand):
 	def run(self, edit, tid = None, name = None, value = None):
-		global _connection, _scripts
-		if _connection != None:
+		global _scripts
+		if self.is_enabled():
 			if value == None:
-				if self.view.id() in _scripts:
-					self.view.replace(edit, sublime.Region(0, self.view.size()), _scripts[self.view.id()][2])
-					self.view.sel().clear()
+				self.view.replace(edit, sublime.Region(0, self.view.size()), _scripts[self.view.id()][2])
+				self.view.sel().clear()
 	
 	def is_enabled(self):
 		global _connection, _scripts
