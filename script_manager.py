@@ -1,6 +1,5 @@
 from threading import RLock
 
-
 class ScriptManager:
 	def __init__(self):
 		self._scripts = dict()

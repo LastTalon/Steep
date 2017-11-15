@@ -5,7 +5,6 @@ import socket
 import json
 from time import sleep
 from queue import Queue, Empty
-from .script_manager import ScriptManager
 
 def _update_script(script, scripts, view):
 	scripts.set(view.id(), script["guid"], script["name"], script["script"].replace("\r", ""))
@@ -45,7 +44,6 @@ def _update_scripts(message, scripts, window, purge = False):
 					break
 			else:
 				i.close()
-
 
 class Server(threading.Thread):
 	def __init__(self, scripts, window):
@@ -107,7 +105,6 @@ class Server(threading.Thread):
 	
 	def exit_thread(self):
 		self._exit.set()
-
 
 class Client(threading.Thread):
 	def __init__(self, scripts, window):
@@ -205,7 +202,6 @@ class Client(threading.Thread):
 	
 	def exit_thread(self):
 		self._exit.set()
-
 
 class Disconnect(threading.Thread):
 	def __init__(self, server, client, scripts):
