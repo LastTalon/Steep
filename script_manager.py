@@ -34,7 +34,7 @@ class ScriptManager:
 			self._scripts[id] = (tid, name, value)
 	
 	def contains_tid(self, tid):
-		return self.get_tid(tid) != None
+		return self.get_tid(tid) is not None
 	
 	def get_tid(self, tid):
 		with self._lock:

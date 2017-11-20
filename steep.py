@@ -22,7 +22,7 @@ class SteepConnectCommand(sublime_plugin.ApplicationCommand):
 	
 	def is_enabled(self):
 		global _connection, _disconnect
-		return _connection == None and _disconnect == None
+		return _connection is None and _disconnect is None
 		
 class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
@@ -33,7 +33,7 @@ class SteepDisconnectCommand(sublime_plugin.ApplicationCommand):
 	
 	def is_enabled(self):
 		global _connection, _disconnect
-		return _connection != None and _disconnect == None
+		return _connection is not None and _disconnect is None
 
 class SteepFinalizeDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
@@ -53,7 +53,7 @@ class SteepLoadCommand(sublime_plugin.WindowCommand):
 	
 	def is_enabled(self):
 		global _connection
-		return _connection != None and _connection[2] == self.window
+		return _connection is not None and _connection[2] is self.window
 		
 class SteepSaveCommand(sublime_plugin.WindowCommand):
 	def run(self):
@@ -63,16 +63,16 @@ class SteepSaveCommand(sublime_plugin.WindowCommand):
 	
 	def is_enabled(self):
 		global _connection
-		return _connection != None and _connection[2] == self.window
+		return _connection is not None and _connection[2] is self.window
 
 class SteepLoadScriptCommand(sublime_plugin.TextCommand):
 	def run(self, edit, tid = None, name = None, value = None):
 		global _scripts
 		if self.is_enabled():
-			if value == None:
+			if value is None:
 				self.view.replace(edit, sublime.Region(0, self.view.size()), _scripts[self.view.id()][2])
 				self.view.sel().clear()
 	
 	def is_enabled(self):
 		global _connection, _scripts
-		return _connection != None and self.view.id() in _scripts
+		return _connection is not None and self.view.id() in _scripts

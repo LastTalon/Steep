@@ -28,7 +28,7 @@ def _update_scripts(message, scripts, window, purge = False):
 				del scripts[i]
 	for i in message["scriptStates"]:
 		id = scripts.get_tid(i["guid"])
-		if id != None:
+		if id is not None:
 			for j in window.views():
 				if j.id() == id:
 					_update_script(i, scripts, j)
@@ -61,7 +61,7 @@ class Server(threading.Thread):
 		
 		while not self._exit.is_set():
 			try:
-				if serverSocket == None:
+				if serverSocket is None:
 					serverSocket = socket.socket()
 					serverSocket.settimeout(1)
 					serverSocket.bind(("127.0.0.1", 39998))
@@ -75,15 +75,15 @@ class Server(threading.Thread):
 			else:
 				self._read_data(connection)
 			finally:
-				if serverSocket != None and (error or self._exit.is_set()):
+				if serverSocket is not None and (error or self._exit.is_set()):
 					serverSocket.close()
 					serverSocket = None
 					error = False
-				if connection != None:
+				if connection is not None:
 					connection.close()
 					connection = None
 				for i in sublime.windows():
-					if i == self._window:
+					if i is self._window:
 						break
 				else:
 					sublime.run_command("steep_disconnect")
@@ -149,14 +149,14 @@ class Client(threading.Thread):
 		
 		try:
 			clientSocket = self._open_socket()
-			if clientSocket != None:
+			if clientSocket is not None:
 				self._send_data(clientSocket, message)
 				message = self._read_data(clientSocket)
 				
-				if message != None and message["messageID"] == 0:
+				if message is not None and message["messageID"] == 0:
 					_update_scripts(message, self._scripts, self._window, True)
 		finally:
-			if clientSocket != None:
+			if clientSocket is not None:
 				clientSocket.close()
 	
 	def _send_save(self):
@@ -172,10 +172,10 @@ class Client(threading.Thread):
 		
 		try:
 			clientSocket = self._open_socket()
-			if clientSocket != None:
+			if clientSocket is not None:
 				self._send_data(clientSocket, message)
 		finally:
-			if clientSocket != None:
+			if clientSocket is not None:
 				clientSocket.close()
 	
 	def _send_data(self, connection, message):
