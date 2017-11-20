@@ -1,5 +1,7 @@
 import sublime
 import unittest
+import threading
+import time
 from Steep import steep
 
 class TestApplicationCommands(unittest.TestCase):
@@ -39,7 +41,47 @@ class TestApplicationCommands(unittest.TestCase):
 		self.assertTrue(dummy.is_enabled())
 	
 	def test_disconnect(self):
-		pass
+		dummy = steep.SteepDisconnectCommand()
+		dummy_connect = steep.SteepConnectCommand()
+		
+		self.assertIsNone(steep._connection)
+		self.assertIsNotNone(steep._scripts)
+		self.assertIsInstance(steep._scripts, steep.ScriptManager)
+		self.assertIsNone(steep._disconnect)
+		self.assertFalse(dummy.is_enabled())
+		self.assertTrue(dummy_connect.is_enabled())
+		
+		sublime.run_command("steep_connect")
+		
+		self.assertIsNotNone(steep._connection)
+		self.assertIsNotNone(steep._scripts)
+		self.assertIsNone(steep._disconnect)
+		self.assertTrue(dummy.is_enabled())
+		self.assertFalse(dummy_connect.is_enabled())
+		
+		sublime.run_command("steep_disconnect")
+		
+		self.assertFalse(dummy.is_enabled())
+		self.assertFalse(dummy_connect.is_enabled())
+		
+		time.sleep(2)
 	
 	def test_finalize_disconnect(self):
-		pass
+		dummy = steep.SteepFinalizeDisconnectCommand()
+		dummy_disconnect = steep.SteepDisconnectCommand()
+		dummy_connect = steep.SteepConnectCommand()
+		
+		self.assertFalse(dummy.is_visible())
+		
+		sublime.run_command("steep_connect")
+		
+		steep._disconnect = 1
+		steep._connection[0].exit_thread()
+		steep._connection[1].exit_thread()
+		steep._scripts.clear()
+		sublime.run_command("steep_finalize_disconnect")
+		
+		self.assertIsNone(steep._connection)
+		self.assertIsNone(steep._disconnect)
+		self.assertFalse(dummy_disconnect.is_enabled())
+		self.assertTrue(dummy_connect.is_enabled())
