@@ -71,6 +71,10 @@ class TestApplicationCommands(unittest.TestCase):
 		self.assertFalse(dummy_connect.is_enabled())
 		
 		sublime.run_command("steep_disconnect")
+		steep._disconnect.cancel_finalize()
 		
 		self.assertFalse(dummy_disconnect.is_enabled())
 		self.assertFalse(dummy_connect.is_enabled())
+		
+		sublime.run_command("steep_finalize_disconnect")
+		steep._scripts.clear()

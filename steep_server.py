@@ -211,11 +211,16 @@ class Disconnect(threading.Thread):
 		self._client = client
 		self._scripts = scripts
 		self._disconnected = False
+		self._cancel = False
 	
 	def run(self):
 		self._client.exit_thread()
 		self._server.exit_thread()
 		self._client.join()
 		self._server.join()
-		self._scripts.clear()
-		sublime.run_command("steep_finalize_disconnect")
+		if not self._cancel:
+			self._scripts.clear()
+			sublime.run_command("steep_finalize_disconnect")
+	
+	def cancel_finalize(self):
+		self._cancel = True

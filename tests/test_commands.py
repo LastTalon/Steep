@@ -23,7 +23,12 @@ class TestCommands(unittest.TestCase):
 		self.assertFalse(dummy.is_enabled())
 		self.assertTrue(dummy2.is_enabled())
 		
-		sublime.run_command("steep_disconnect")
+		steep._connection[0].exit_thread()
+		steep._connection[1].exit_thread()
+		steep._connection[2].run_command("close_window")
+		steep._connection = None
+		steep._scripts.clear()
+		steep._disconnect = None
 	
 	def test_save(self):
 		pass
