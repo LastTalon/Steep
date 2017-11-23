@@ -18,7 +18,7 @@ class TestCommands(unittest.TestCase):
 		self.assertFalse(dummy.is_enabled())
 		self.assertTrue(dummy2.is_enabled())
 		
-		steep._connection[2].run_command("is_enabled")
+		steep._connection[2].run_command("steep_load")
 		
 		self.assertFalse(dummy.is_enabled())
 		self.assertTrue(dummy2.is_enabled())
