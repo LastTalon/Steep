@@ -41,37 +41,11 @@ class TestApplicationCommands(unittest.TestCase):
 		self.assertTrue(dummy.is_enabled())
 	
 	def test_disconnect(self):
-		dummy = steep.SteepDisconnectCommand()
-		dummy_connect = steep.SteepConnectCommand()
-		
-		self.assertIsNone(steep._connection)
-		self.assertIsNotNone(steep._scripts)
-		self.assertIsInstance(steep._scripts, steep.ScriptManager)
-		self.assertIsNone(steep._disconnect)
-		self.assertFalse(dummy.is_enabled())
-		self.assertTrue(dummy_connect.is_enabled())
-		
-		sublime.run_command("steep_connect")
-		
-		self.assertIsNotNone(steep._connection)
-		self.assertIsNotNone(steep._scripts)
-		self.assertIsNone(steep._disconnect)
-		self.assertTrue(dummy.is_enabled())
-		self.assertFalse(dummy_connect.is_enabled())
-		
-		sublime.run_command("steep_disconnect")
-		
-		self.assertFalse(dummy.is_enabled())
-		self.assertFalse(dummy_connect.is_enabled())
-		
-		time.sleep(2)
-	
-	def test_finalize_disconnect(self):
-		dummy = steep.SteepFinalizeDisconnectCommand()
+		dummy_finalize = steep.SteepFinalizeDisconnectCommand()
 		dummy_disconnect = steep.SteepDisconnectCommand()
 		dummy_connect = steep.SteepConnectCommand()
 		
-		self.assertFalse(dummy.is_visible())
+		self.assertFalse(dummy_finalize.is_visible())
 		
 		sublime.run_command("steep_connect")
 		
@@ -85,3 +59,18 @@ class TestApplicationCommands(unittest.TestCase):
 		self.assertIsNone(steep._disconnect)
 		self.assertFalse(dummy_disconnect.is_enabled())
 		self.assertTrue(dummy_connect.is_enabled())
+		self.assertIsNotNone(steep._scripts)
+		self.assertIsInstance(steep._scripts, steep.ScriptManager)
+		
+		sublime.run_command("steep_connect")
+		
+		self.assertIsNotNone(steep._connection)
+		self.assertIsNotNone(steep._scripts)
+		self.assertIsNone(steep._disconnect)
+		self.assertTrue(dummy_disconnect.is_enabled())
+		self.assertFalse(dummy_connect.is_enabled())
+		
+		sublime.run_command("steep_disconnect")
+		
+		self.assertFalse(dummy_disconnect.is_enabled())
+		self.assertFalse(dummy_connect.is_enabled())
